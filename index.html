@@ -1,0 +1,320 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Prompt Forge</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #f6f5f1; --surface: #ffffff; --surface-2: #f0eee8; --border: #e2dfd6;
+  --text: #1d1c1a; --muted: #6b6860; --accent: #c2572b; --accent-soft: #f7e5dc;
+  --accent-text: #9a3f1b; --good: #2f7a4f; --code-bg: #1f1e1c; --code-text: #ece9e1;
+  --shadow: 0 1px 2px rgba(0,0,0,.04), 0 4px 16px rgba(0,0,0,.04);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #161514; --surface: #1f1e1c; --surface-2: #282624; --border: #34322e;
+    --text: #ece9e1; --muted: #9e9a90; --accent: #e07a4c; --accent-soft: #3a2519;
+    --accent-text: #f0a47f; --good: #6cc38f; --code-bg: #121110; --code-text: #ece9e1;
+    --shadow: none;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #161514; --surface: #1f1e1c; --surface-2: #282624; --border: #34322e;
+  --text: #ece9e1; --muted: #9e9a90; --accent: #e07a4c; --accent-soft: #3a2519;
+  --accent-text: #f0a47f; --good: #6cc38f; --code-bg: #121110; --code-text: #ece9e1;
+  --shadow: none;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--text); font: 15px/1.55 Inter, system-ui, sans-serif; }
+.wrap { max-width: 1240px; margin: 0 auto; padding: 0 16px 64px; }
+header { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 24px 0 8px; flex-wrap: wrap; }
+h1 { font-size: 24px; margin: 0; letter-spacing: -.02em; }
+h1 span { color: var(--accent); }
+.sub { color: var(--muted); margin: 2px 0 0; font-size: 14px; }
+.top-right { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+#theme button { padding: 8px 12px; }
+.tabs { display: flex; gap: 4px; background: var(--surface-2); padding: 4px; border-radius: 10px; }
+.tabs button { border: 0; background: none; color: var(--muted); font: inherit; font-weight: 500; padding: 7px 14px; border-radius: 7px; cursor: pointer; }
+.tabs button.on { background: var(--surface); color: var(--text); box-shadow: var(--shadow); }
+h2 { font-size: 13px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); margin: 28px 0 12px; font-weight: 600; }
+
+.acts { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 8px; }
+.act { text-align: left; border: 1px solid var(--border); background: var(--surface); color: var(--text); border-radius: 10px; padding: 10px 12px; cursor: pointer; font: inherit; transition: border-color .15s, background .15s; }
+.act:hover { border-color: var(--accent); }
+.act.on { border-color: var(--accent); background: var(--accent-soft); }
+.act b { display: block; font-size: 14px; font-weight: 600; }
+.act small { color: var(--muted); font-size: 12.5px; }
+
+.grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr); gap: 24px; align-items: start; }
+@media (max-width: 900px) { .grid { grid-template-columns: 1fr; } }
+.card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 18px; box-shadow: var(--shadow); }
+label { display: block; font-weight: 600; font-size: 13.5px; margin: 14px 0 5px; }
+label:first-child { margin-top: 0; }
+label .rec { font-weight: 500; font-size: 11.5px; color: var(--accent-text); background: var(--accent-soft); padding: 1px 7px; border-radius: 99px; margin-left: 6px; }
+label .opt { font-weight: 400; color: var(--muted); font-size: 12.5px; }
+textarea, input[type=text], select { width: 100%; font: inherit; font-size: 14px; color: var(--text); background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 8px 10px; }
+textarea { resize: vertical; min-height: 44px; }
+textarea:focus, input:focus, select:focus { outline: 2px solid var(--accent); outline-offset: -1px; border-color: transparent; }
+.row { display: grid; grid-template-columns: 1fr 1fr; gap: 0 12px; }
+.row label { margin-top: 14px; }
+.toggles { display: grid; gap: 8px; margin-top: 16px; }
+.tog { display: flex; gap: 10px; align-items: flex-start; font-weight: 400; margin: 0; cursor: pointer; padding: 8px 10px; border-radius: 8px; border: 1px solid var(--border); }
+.tog input { margin-top: 3px; accent-color: var(--accent); }
+.tog span b { font-weight: 600; }
+.tog span small { display: block; color: var(--muted); font-size: 12.5px; }
+details { margin-top: 14px; }
+details summary { cursor: pointer; font-weight: 600; font-size: 13.5px; color: var(--muted); }
+
+.out { position: sticky; top: 16px; }
+.out-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; margin-bottom: 10px; }
+.meta { color: var(--muted); font-size: 13px; }
+.meta b { color: var(--text); }
+.btns { display: flex; gap: 6px; }
+.btn { border: 1px solid var(--border); background: var(--surface); color: var(--text); font: inherit; font-size: 13px; font-weight: 500; padding: 6px 12px; border-radius: 8px; cursor: pointer; }
+.btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+.seg { display: inline-flex; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+.seg button { border: 0; background: var(--surface); color: var(--muted); font: inherit; font-size: 12.5px; padding: 6px 10px; cursor: pointer; }
+.seg button.on { background: var(--surface-2); color: var(--text); font-weight: 600; }
+pre#prompt { background: var(--code-bg); color: var(--code-text); font: 13px/1.6 "JetBrains Mono", ui-monospace, monospace; padding: 16px; border-radius: 10px; white-space: pre-wrap; word-break: break-word; max-height: 56vh; overflow: auto; margin: 0; }
+.why { list-style: none; padding: 0; margin: 0; display: grid; gap: 8px; }
+.why li { display: grid; grid-template-columns: auto 1fr; gap: 10px; align-items: baseline; font-size: 13.5px; }
+.chip { font-size: 12px; font-weight: 600; padding: 2px 9px; border-radius: 99px; background: var(--accent-soft); color: var(--accent-text); white-space: nowrap; }
+.chip.Skeleton { background: var(--text); color: var(--bg); }
+.tips { margin: 0; padding-left: 18px; font-size: 13.5px; color: var(--muted); }
+.tips li { margin: 4px 0; }
+
+.guide .cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 12px; }
+.guide .card h3 { margin: 0 0 4px; font-size: 15px; }
+.guide .card p { margin: 0; color: var(--muted); font-size: 13.5px; }
+.guide .card code { display: block; margin-top: 8px; font: 12.5px "JetBrains Mono", monospace; color: var(--accent-text); }
+.guide .card .grp { float: right; font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; }
+.comp { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; }
+.comp .card b { color: var(--accent); font-size: 20px; }
+.claude li { margin: 6px 0; }
+[hidden] { display: none !important; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div>
+      <h1>Prompt <span>Forge</span></h1>
+      <p class="sub">Pick what you want the AI to do and get a prompt built from the right frameworks.</p>
+    </div>
+    <div class="top-right">
+      <div class="tabs" role="tablist">
+        <button class="on" data-tab="build">Build a prompt</button>
+        <button data-tab="guide">The guide</button>
+      </div>
+      <div class="seg" id="theme" title="Theme">
+        <button data-v="auto">Auto</button>
+        <button data-v="light">Light</button>
+        <button data-v="dark">Dark</button>
+      </div>
+    </div>
+  </header>
+
+  <main id="tab-build">
+    <h2>1 · What do you want the AI to do?</h2>
+    <div class="acts" id="acts"></div>
+
+    <h2>2 · Fill in what you know. The prompt updates live.</h2>
+    <div class="grid">
+      <form class="card" id="form" onsubmit="return false">
+        <label for="task">Task <span class="opt">what exactly should it do?</span></label>
+        <textarea id="task" rows="3"></textarea>
+
+        <label for="context">Context <span class="opt">background, the "why", what you already know</span></label>
+        <textarea id="context" rows="2"></textarea>
+
+        <label for="audience">Audience <span class="opt">who the output is for</span></label>
+        <input type="text" id="audience" placeholder="e.g. non-technical managers, Gen-Z readers, myself">
+
+        <label for="source"><span id="sourceLabel">Source material</span> <span class="rec" id="sourceRec" hidden>recommended</span> <span class="opt">document, code or data to work from</span></label>
+        <textarea id="source" rows="3" placeholder="Paste text here"></textarea>
+
+        <label for="examples">Examples <span class="rec" id="exRec" hidden>recommended</span> <span class="opt">few-shot: input -> output pairs</span></label>
+        <textarea id="examples" rows="2" placeholder='"I loved the pizza!" -> {"sentiment": "positive"}'></textarea>
+
+        <label for="focus">Focus keywords <span class="rec" id="focusRec" hidden>recommended</span> <span class="opt">comma-separated</span></label>
+        <input type="text" id="focus" placeholder="e.g. financial impact, future growth">
+
+        <label for="constraints">Your constraints <span class="opt">one per line</span></label>
+        <textarea id="constraints" rows="2" placeholder="Don't mention competitors&#10;Use British spelling"></textarea>
+
+        <div class="row">
+          <div><label for="format">Format</label><select id="format"></select></div>
+          <div><label for="tone">Tone</label><select id="tone"></select></div>
+          <div><label for="length">Length</label><select id="length"></select></div>
+          <div><label for="complexity">Complexity</label>
+            <select id="complexity">
+              <option value="auto">Auto</option><option value="simple">Simple</option>
+              <option value="moderate">Moderate</option><option value="complex">Complex</option>
+            </select></div>
+        </div>
+
+        <div class="toggles">
+          <label class="tog"><input type="checkbox" id="liveInfo"><span><b>Needs current information</b><small>Adds a ReAct Thought → Action → Observation loop (for models that can browse)</small></span></label>
+          <label class="tog"><input type="checkbox" id="compare"><span><b>Explore multiple approaches</b><small>Adds Tree of Thoughts: 3 experts propose, critique and merge</small></span></label>
+          <label class="tog"><input type="checkbox" id="clarify"><span><b>Let the AI ask questions first</b><small>CREATE's "Extras": it checks in before guessing</small></span></label>
+        </div>
+      </form>
+
+      <section class="out">
+        <div class="card">
+          <div class="out-head">
+            <div class="meta" id="meta"></div>
+            <div class="btns">
+              <div class="seg" id="style">
+                <button data-v="xml" class="on" title="XML tags: best for Claude">XML</button>
+                <button data-v="markdown" title="Markdown headings: works with any model">Markdown</button>
+              </div>
+              <button class="btn primary" id="copy">Copy</button>
+            </div>
+          </div>
+          <pre id="prompt"></pre>
+
+          <h2 style="margin-top:20px">Why these frameworks</h2>
+          <ul class="why" id="why"></ul>
+
+          <h2>After the first run</h2>
+          <ul class="tips" id="tips"></ul>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <main id="tab-guide" class="guide" hidden>
+    <h2>The anatomy of a perfect prompt</h2>
+    <div class="comp" id="g-comp"></div>
+    <h2>Fundamental rules</h2>
+    <div class="cards" id="g-rules"></div>
+    <h2>Frameworks & techniques</h2>
+    <div class="cards" id="g-tech"></div>
+    <h2>Getting the most out of Claude</h2>
+    <div class="card"><ul class="claude" id="g-claude"></ul></div>
+  </main>
+</div>
+
+<script src="knowledge.js"></script>
+<script src="engine.js"></script>
+<script>
+const K = KNOWLEDGE;
+const $ = (id) => document.getElementById(id);
+const FIELDS = ["task", "context", "audience", "source", "examples", "focus", "constraints", "format", "tone", "length", "complexity"];
+let activity = K.activities[0];
+let style = "xml";
+
+const store = {
+  get(k) { try { return localStorage.getItem(k); } catch { return null; } },
+  set(k, v) { try { localStorage.setItem(k, v); } catch {} },
+};
+const esc = (s) => s.replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const cap = (s) => s[0].toUpperCase() + s.slice(1);
+
+function fillSelect(id, first, entries) {
+  $(id).innerHTML = [first, ...entries].map(([v, t]) => `<option value="${v}">${t}</option>`).join("");
+}
+fillSelect("format", ["auto", "Auto"], Object.keys(K.formats).map((k) => [k, k === "json" ? "JSON" : cap(k)]));
+fillSelect("tone", ["", "Default"], Object.keys(K.tones).map((k) => [k, cap(k)]));
+fillSelect("length", ["", "Any"], Object.keys(K.lengths).map((k) => [k, cap(k)]));
+
+$("acts").innerHTML = K.activities.map((a) =>
+  `<button class="act" data-id="${a.id}"><b>${esc(a.name)}</b><small>${esc(a.blurb)}</small></button>`).join("");
+$("acts").addEventListener("click", (e) => {
+  const b = e.target.closest(".act");
+  if (b) selectActivity(b.dataset.id);
+});
+
+function selectActivity(id) {
+  activity = K.activities.find((a) => a.id === id) || K.activities[0];
+  store.set("pf-activity", activity.id);
+  document.querySelectorAll(".act").forEach((b) => b.classList.toggle("on", b.dataset.id === activity.id));
+  $("task").placeholder = activity.placeholder;
+  $("sourceLabel").textContent = activity.sourceLabel || "Source material";
+  $("sourceRec").hidden = !activity.wantsSource;
+  $("exRec").hidden = !activity.wantsExamples;
+  $("focusRec").hidden = !activity.suggestFocus;
+  $("liveInfo").checked = !!activity.liveInfo;
+  $("compare").checked = !!activity.compare;
+  $("clarify").checked = !!activity.clarify || activity.complexity === "complex";
+  $("format").value = "auto";
+  $("format").options[0].textContent = `Auto (${activity.format === "json" ? "JSON" : cap(activity.format)})`;
+  $("complexity").options[0].textContent = `Auto (${cap(activity.complexity)})`;
+  render();
+}
+
+function render() {
+  const input = { activity: activity.id, style };
+  FIELDS.forEach((f) => (input[f] = $(f).value));
+  ["liveInfo", "compare", "clarify"].forEach((f) => (input[f] = $(f).checked));
+  const r = buildPrompt(K, input);
+  $("prompt").textContent = r.prompt;
+  $("meta").innerHTML = `<b>${esc(K.techniques[r.skeleton].name)}</b> skeleton · ${r.complexity} · ~${r.approxTokens} tokens`;
+  $("why").innerHTML = r.selected.map((s) => {
+    const t = K.techniques[s.id];
+    return `<li><span class="chip ${t.group}">${esc(t.name)}</span><span>${esc(s.reason)}</span></li>`;
+  }).join("");
+  $("tips").innerHTML = r.tips.map((t) => `<li>${esc(t)}</li>`).join("");
+}
+
+$("form").addEventListener("input", render);
+$("style").addEventListener("click", (e) => {
+  const b = e.target.closest("button");
+  if (!b) return;
+  style = b.dataset.v;
+  store.set("pf-style", style);
+  document.querySelectorAll("#style button").forEach((x) => x.classList.toggle("on", x === b));
+  render();
+});
+$("copy").addEventListener("click", async () => {
+  const text = $("prompt").textContent;
+  try { await navigator.clipboard.writeText(text); }
+  catch {
+    const r = document.createRange(); r.selectNodeContents($("prompt"));
+    const sel = getSelection(); sel.removeAllRanges(); sel.addRange(r); document.execCommand("copy");
+  }
+  $("copy").textContent = "Copied ✓";
+  setTimeout(() => ($("copy").textContent = "Copy"), 1400);
+});
+
+document.querySelector(".tabs").addEventListener("click", (e) => {
+  const b = e.target.closest("button");
+  if (!b) return;
+  document.querySelectorAll(".tabs button").forEach((x) => x.classList.toggle("on", x === b));
+  $("tab-build").hidden = b.dataset.tab !== "build";
+  $("tab-guide").hidden = b.dataset.tab !== "guide";
+});
+
+// Guide tab, rendered from the same knowledge base
+const G = K.guide;
+$("g-comp").innerHTML = G.components.map(([n, d], i) =>
+  `<div class="card"><b>${i + 1}</b><h3>${esc(n)}</h3><p>${esc(d)}</p></div>`).join("");
+$("g-rules").innerHTML = G.rules.map(([n, d]) => `<div class="card"><h3>${esc(n)}</h3><p>${esc(d)}</p></div>`).join("");
+$("g-tech").innerHTML = Object.values(K.techniques).map((t) =>
+  `<div class="card"><span class="grp">${t.group}</span><h3>${esc(t.name)}</h3><p>${esc(t.what)}</p>
+   <p style="margin-top:6px"><b style="color:var(--text)">Use when:</b> ${esc(t.when)}</p><code>${esc(t.trigger)}</code></div>`).join("");
+$("g-claude").innerHTML = G.claude.map((c) => `<li>${esc(c)}</li>`).join("");
+
+function setTheme(t) {
+  if (t === "light" || t === "dark") document.documentElement.dataset.theme = t;
+  else { t = "auto"; delete document.documentElement.dataset.theme; }
+  store.set("pf-theme", t);
+  document.querySelectorAll("#theme button").forEach((b) => b.classList.toggle("on", b.dataset.v === t));
+}
+$("theme").addEventListener("click", (e) => {
+  const b = e.target.closest("button");
+  if (b) setTheme(b.dataset.v);
+});
+setTheme(store.get("pf-theme"));
+
+const savedStyle = store.get("pf-style");
+if (savedStyle === "markdown") $("style").querySelector('[data-v="markdown"]').click();
+selectActivity(store.get("pf-activity") || K.activities[0].id);
+</script>
+</body>
+</html>
